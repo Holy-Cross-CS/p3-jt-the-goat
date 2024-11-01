@@ -49,6 +49,7 @@ server_port = None # e.g. 8888 or similar
 server_root = "./web_root"
 server_ip = None
 
+version_lock = threading.Condition()
 sidebar = 0
 versionList = [0, 0, 0]
 topicsList = ["football", "america", "saders"]
@@ -694,9 +695,9 @@ def handle_http_get_topics(req, conn): #sidebar
     log("Handling http get topic request")
     version = int(req.path.split('=')[1])
 
-    while version > 0:
+    while version > sidebar:
        pass
-    msg = '0\n'
+    msg = f'{sidebar}\n'
     for i in range(len(topicsList)):
         msg += f"{topicsCt[i]} {topicsLikes[i]} {topicsList[i]}\n"
 
@@ -711,9 +712,9 @@ def handle_httpe_get_tweets(req, conn):
     print(pos)
     print(tweetList[pos])
 
-    while version > 0:
+    while version > versionList[pos]: #
        pass
-    msg = '0\n'
+    msg = f'{versionList[pos]}\n'
     for i in range(len(tweetList[pos])):
         print(i)
         msg += f"- {tweetList[pos][i]} \n"
@@ -745,25 +746,22 @@ def handle_http_post(req, conn):
     print(req.body)
     print(req.headers)
     #print(conn.client_addr)
+    print(req.path)
     content_length = get_header_value(req.headers, "Content-Length")
-    
+    print("hello")
     if not content_length:
         send_http_response(conn, Response(411, "text/plain", "Missing Content-Length header"))
         return
-
-    try:
-        content_length = int(content_length)
-        req.body = conn.read_amount(content_length).decode("utf-8")
-    except ValueError:
-        send_http_response(conn, Response(400, "text/plain", "Invalid Content-Length value"))
-        return
-
+    print("hello")
+    global sidebar
     # Process POST /whisper/messages
     if req.path == "/whisper/messages":
+        print ("in the loop")
         # Parse tags and message from request body
         lines = req.body.splitlines()
         if len(lines) != 2 or not lines[0].startswith("tags... ") or not lines[1].startswith("message... "):
             send_http_response(conn, Response(400, "text/plain", "Invalid message format"))
+            print("invalid msg")
             return
 
         # Extract topics and message content
@@ -779,24 +777,25 @@ def handle_http_post(req, conn):
         # Add message to topics, creating new topics if necessary
         with version_lock:  # Locking to protect shared variables
             for topic in topics:
+                print ("working on " + topic)
                 if topic not in topicsList:
                     # Initialize new topic with versioning
                     topicsList.append(topic)
                     topicsLikes.append(0)
                     topicsCt.append(1)
                     tweetList.append([message])
-                    topic_versions[topic] = 0  # Initializing version for the new topic
-                    topic_list_version += 1  # Increment the main topic list version
+                    versionList.append(0)  # Initializing version for the new topic
+                    sidebar += 1  # Increment the main topic list version
                 else:
                 # Update topic with new message and increment version
                     topic_index = topicsList.index(topic)
                     topicsCt[topic_index] += 1
                     tweetList[topic_index].append(message)
-                    topic_versions[topic] += 1  # Increment topic-specific version
+                    versionList[topic_index] += 1  # Increment topic-specific version
 
             version_lock.notify_all()  # Notify all waiting clients of the update
-
-        send_http_response(conn, Response(200, "text/plain", "success"))
+        print ("sending resp")
+        send_http_response(conn, Response("200", "text/plain", "success"))
         
     # Process POST /whisper/like/TOPIC
     elif req.path.startswith("/whisper/like/"):
@@ -807,17 +806,16 @@ def handle_http_post(req, conn):
             if topic in topicsList:
                 topic_index = topicsList.index(topic)
                 topicsLikes[topic_index] += 1
-                topic_list_version += 1  # Increment the main topic list version when a like is added
-                topic_versions[topic] += 1  # Increment the version of the specific topic
+                sidebar += 1  # Increment the main topic list version when a like is added
+                versionList[topic_index] += 1  # Increment the version of the specific topic
                 
                 version_lock.notify_all()  # Notify all waitang clients of the update
-                send_http_response(conn, Response(200, "text/plain", "success"))
+                send_http_response(conn, Response("200", "text/plain", "success"))
             else:
-                send_http_response(conn, Response(404, "text/plain", "Topic not found"))
+                send_http_response(conn, Response("404", "text/plain", "Topic not found"))
     else:
-        send_http_response(conn, Response(404, "text/plain", "Unknown POST request path"))
+        send_http_response(conn, Response("404", "text/plain", "Unknown POST request path"))
     # Send the response
-    send_http_response(conn, resp)
 
 # handle_http_connection() reads one or more HTTP requests from a client, parses
 # each one, and sends back appropriate responses to the client.

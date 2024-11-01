@@ -9,10 +9,10 @@ the whisper web app.
 Tasks:
 
 - [x] implement the client half of the whisper app
-- [ ] add webserver.py for the server half, borrowing from earlier project
-   - [ ] print the appropriate URL for whisper app to console
+- [x] add webserver.py for the server half, borrowing from earlier project
+   - [x] print the appropriate URL for whisper app to console
 - [ ] handle GET for topic list
-   - [ ] handle version 0 as a temporary stop-gap
+   - [x] handle version 0 as a temporary stop-gap
    - [ ] handle version 1 as a temporary stop-gap
    - [ ] handle any version N, the general case, with proper wait/notify\_all
    - [ ] return appropriate errors if topic not found or other errors
@@ -28,5 +28,8 @@ Tasks:
 - [ ] reach goal: implement downvoting/removal of messages
 - [ ] reach goal: implement other features, e.g. using cookies, etc.
 - [ ] project still does not use HTTP related python libraries or modules
-- [ ] does not crash under normal usage
-- [ ] Update README.md to describe final state of project, collaboration, etc.
+- [x] does not crash under normal usage
+- [x] Update README.md to describe final state of project, collaboration, etc.
+
+
+Spoke with 

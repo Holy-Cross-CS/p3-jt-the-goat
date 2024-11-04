@@ -11,17 +11,17 @@ Tasks:
 - [x] implement the client half of the whisper app
 - [x] add webserver.py for the server half, borrowing from earlier project
    - [x] print the appropriate URL for whisper app to console
-- [ ] handle GET for topic list
+- [x] handle GET for topic list
    - [x] handle version 0 as a temporary stop-gap
    - [ ] handle version 1 as a temporary stop-gap
-   - [ ] handle any version N, the general case, with proper wait/notify\_all
-   - [ ] return appropriate errors if topic not found or other errors
-- [ ] handle POST for messages
+   - [x] handle any version N, the general case, with proper wait/notify\_all
+   - [x] return appropriate errors if topic not found or other errors
+- [x] handle POST for messages
    - [ ] return appropriate errors if request is malformed or other errors
-- [ ] handle GET for topic message feed
-   - [ ] handle any version N, with proper wait/notify\_all
+- [x] handle GET for topic message feed
+   - [] ] handle any version N, with proper wait/notify\_all
    - [ ] return appropriate errors if topic is not found or other errors
-- [ ] handle POST for liking a topic
+- [x] handle POST for liking a topic
    - [ ] return appropriate errors if topic is not found or other errors
 - [ ] reach goal: topics are sorted by some criteria
 - [ ] reach goal: limit each topic to only the most recent messages
